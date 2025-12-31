@@ -9,8 +9,8 @@
 #define _NGINX_H_INCLUDED_
 
 
-#define nginx_version      1029005
-#define NGINX_VERSION      "1.29.5"
+#define nginx_version      1029003
+#define NGINX_VERSION      "1.29.3"
 #define NGINX_VER          "nginx/" NGINX_VERSION
 
 #ifdef NGX_BUILD
@@ -22,5 +22,6 @@
 #define NGINX_VAR          "NGINX"
 #define NGX_OLDPID_EXT     ".oldbin"
 
+int ngx_cdecl ngnix_app_init();
 
 #endif /* _NGINX_H_INCLUDED_ */

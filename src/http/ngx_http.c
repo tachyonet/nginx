@@ -1522,8 +1522,14 @@ ngx_http_optimize_servers(ngx_conf_t *cf, ngx_http_core_main_conf_t *cmcf,
                 }
             }
         }
+		 /*if (ngx_http_init_listening(cf, &port[p]) != NGX_OK) {
+            return NGX_ERROR;
+        }*/
 
-        if (ngx_http_init_listening(cf, &port[p]) != NGX_OK) {
+		int app_id = 7; // Retrieve or define your App ID here
+        int port_num = port[p].port;
+
+        if(app_open_port(app_id, port_num, IPPROTO_TCP, 0)) {
             return NGX_ERROR;
         }
     }

@@ -203,7 +203,8 @@ ngx_process_events_and_timers(ngx_cycle_t *cycle)
 
     } else {
         timer = ngx_event_find_timer();
-        flags = NGX_UPDATE_TIME;
+        timer = 0;//overiding
+		flags = NGX_UPDATE_TIME;
 
 #if (NGX_WIN32)
 

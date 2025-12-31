@@ -904,7 +904,6 @@ ngx_http_v3_init_pseudo_headers(ngx_http_request_t *r)
     u_char     *p;
     ngx_int_t   rc;
     ngx_str_t   host;
-    in_port_t   port;
 
     if (r->request_line.len) {
         return NGX_OK;
@@ -962,7 +961,7 @@ ngx_http_v3_init_pseudo_headers(ngx_http_request_t *r)
         host.len = r->host_end - r->host_start;
         host.data = r->host_start;
 
-        rc = ngx_http_validate_host(&host, &port, r->pool, 0);
+        rc = ngx_http_validate_host(&host, r->pool, 0);
 
         if (rc == NGX_DECLINED) {
             ngx_log_error(NGX_LOG_INFO, r->connection->log, 0,
@@ -980,7 +979,16 @@ ngx_http_v3_init_pseudo_headers(ngx_http_request_t *r)
         }
 
         r->headers_in.server = host;
-        r->port = port;
+
+        p = ngx_strlchr(r->host_start + host.len, r->host_end, ':');
+
+        if (p) {
+            rc = ngx_atoi(p + 1, r->host_end - p - 1);
+
+            if (rc > 0 && rc < 65536) {
+                r->port = rc;
+            }
+        }
     }
 
     if (ngx_list_init(&r->headers_in.headers, r->pool, 20,

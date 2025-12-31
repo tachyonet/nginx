@@ -152,6 +152,9 @@
 #define NGX_HTTP_SUB_BUFFERED              0x02
 #define NGX_HTTP_COPY_BUFFERED             0x04
 
+ngx_int_t ngx_http_process_request_header(ngx_http_request_t *r);
+ssize_t ngx_http_read_request_header(ngx_http_request_t *r);
+ngx_int_t ngx_http_alloc_large_header_buffer(ngx_http_request_t *r, ngx_uint_t request_line);
 
 typedef enum {
     NGX_HTTP_INITING_REQUEST_STATE = 0,

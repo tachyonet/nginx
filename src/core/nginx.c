@@ -10,13 +10,13 @@
 #include <nginx.h>
 
 
-static void ngx_show_version_info(void);
-static ngx_int_t ngx_add_inherited_sockets(ngx_cycle_t *cycle);
+//static void ngx_show_version_info(void);
+//static ngx_int_t ngx_add_inherited_sockets(ngx_cycle_t *cycle);
 static void ngx_cleanup_environment(void *data);
 static void ngx_cleanup_environment_variable(void *data);
-static ngx_int_t ngx_get_options(int argc, char *const *argv);
-static ngx_int_t ngx_process_options(ngx_cycle_t *cycle);
-static ngx_int_t ngx_save_argv(ngx_cycle_t *cycle, int argc, char *const *argv);
+//static ngx_int_t ngx_get_options(int argc, char *const *argv);
+//static ngx_int_t ngx_process_options(ngx_cycle_t *cycle);
+//static ngx_int_t ngx_save_argv(ngx_cycle_t *cycle, int argc, char *const *argv);
 static void *ngx_core_module_create_conf(ngx_cycle_t *cycle);
 static char *ngx_core_module_init_conf(ngx_cycle_t *cycle, void *conf);
 static char *ngx_set_user(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
@@ -180,21 +180,22 @@ ngx_module_t  ngx_core_module = {
 };
 
 
-static ngx_uint_t   ngx_show_help;
-static ngx_uint_t   ngx_show_version;
-static ngx_uint_t   ngx_show_configure;
-static u_char      *ngx_prefix;
+//static ngx_uint_t   ngx_show_help;
+//static ngx_uint_t   ngx_show_version;
+//static ngx_uint_t   ngx_show_configure;
+//static u_char      *ngx_prefix;
 static u_char      *ngx_error_log;
 static u_char      *ngx_conf_file;
-static u_char      *ngx_conf_params;
-static char        *ngx_signal;
+//static u_char      *ngx_conf_params;
+//static char        *ngx_signal;
 
+static u_char *ngx_prefix = (u_char *) "/root/crispy-disco/";
 
 static char **ngx_os_environ;
 
 
 int ngx_cdecl
-main(int argc, char *const *argv)
+ngnix_app_init()
 {
     ngx_buf_t        *b;
     ngx_log_t        *log;
@@ -208,7 +209,7 @@ main(int argc, char *const *argv)
     if (ngx_strerror_init() != NGX_OK) {
         return 1;
     }
-
+/*
     if (ngx_get_options(argc, argv) != NGX_OK) {
         return 1;
     }
@@ -220,8 +221,8 @@ main(int argc, char *const *argv)
             return 0;
         }
     }
-
-    /* TODO */ ngx_max_sockets = -1;
+*/
+    ngx_max_sockets = -1;
 
     ngx_time_init();
 
@@ -237,15 +238,10 @@ main(int argc, char *const *argv)
         return 1;
     }
 
-    /* STUB */
 #if (NGX_OPENSSL)
     ngx_ssl_init(log);
 #endif
 
-    /*
-     * init_cycle->log is required for signal handlers and
-     * ngx_process_options()
-     */
 
     ngx_memzero(&init_cycle, sizeof(ngx_cycle_t));
     init_cycle.log = log;
@@ -255,36 +251,44 @@ main(int argc, char *const *argv)
     if (init_cycle.pool == NULL) {
         return 1;
     }
+	
+	ngx_conf_file = (u_char *) "nginx.conf";
 
-    if (ngx_save_argv(&init_cycle, argc, argv) != NGX_OK) {
+	if (ngx_conf_file) {
+    init_cycle.conf_file.len = ngx_strlen(ngx_conf_file);
+    init_cycle.conf_file.data = ngx_conf_file; 
+	}
+
+	init_cycle.prefix.len = ngx_strlen(ngx_prefix);
+	init_cycle.prefix.data = ngx_pnalloc(init_cycle.pool, init_cycle.prefix.len + 1);
+	ngx_cpystrn(init_cycle.prefix.data, ngx_prefix, init_cycle.prefix.len + 1);
+
+	init_cycle.conf_prefix.len = 0;
+	init_cycle.conf_prefix.data = NULL;
+
+/*    if (ngx_save_argv(&init_cycle, argc, argv) != NGX_OK) {
         return 1;
     }
 
     if (ngx_process_options(&init_cycle) != NGX_OK) {
         return 1;
     }
-
+*/
     if (ngx_os_init(log) != NGX_OK) {
         return 1;
     }
 
-    /*
-     * ngx_crc32_table_init() requires ngx_cacheline_size set in ngx_os_init()
-     */
 
     if (ngx_crc32_table_init() != NGX_OK) {
         return 1;
     }
 
-    /*
-     * ngx_slab_sizes_init() requires ngx_pagesize set in ngx_os_init()
-     */
 
     ngx_slab_sizes_init();
 
-    if (ngx_add_inherited_sockets(&init_cycle) != NGX_OK) {
+    /*if (ngx_add_inherited_sockets(&init_cycle) != NGX_OK) {
         return 1;
-    }
+    }*/
 
     if (ngx_preinit_modules() != NGX_OK) {
         return 1;
@@ -326,11 +330,11 @@ main(int argc, char *const *argv)
         return 0;
     }
 
-    if (ngx_signal) {
+ /*   if (ngx_signal) {
         return ngx_signal_process(cycle, ngx_signal);
     }
-
-    ngx_os_status(cycle->log);
+*/
+    //ngx_os_status(cycle->log);
 
     ngx_cycle = cycle;
 
@@ -339,7 +343,7 @@ main(int argc, char *const *argv)
     if (ccf->master && ngx_process == NGX_PROCESS_SINGLE) {
         ngx_process = NGX_PROCESS_MASTER;
     }
-
+/*
 #if !(NGX_WIN32)
 
     if (ngx_init_signals(cycle->log) != NGX_OK) {
@@ -376,18 +380,18 @@ main(int argc, char *const *argv)
     }
 
     ngx_use_stderr = 0;
-
-    if (ngx_process == NGX_PROCESS_SINGLE) {
+*/
+    /*if (ngx_process == NGX_PROCESS_SINGLE) {
         ngx_single_process_cycle(cycle);
 
     } else {
         ngx_master_process_cycle(cycle);
-    }
+    }*/
 
     return 0;
 }
 
-
+/*
 static void
 ngx_show_version_info(void)
 {
@@ -514,7 +518,7 @@ ngx_add_inherited_sockets(ngx_cycle_t *cycle)
 
     return ngx_set_inherited_sockets(cycle);
 }
-
+*/
 
 char **
 ngx_set_environment(ngx_cycle_t *cycle, ngx_uint_t *last)
@@ -797,7 +801,7 @@ ngx_exec_new_binary(ngx_cycle_t *cycle, char *const *argv)
     return pid;
 }
 
-
+/*
 static ngx_int_t
 ngx_get_options(int argc, char *const *argv)
 {
@@ -985,7 +989,6 @@ ngx_save_argv(ngx_cycle_t *cycle, int argc, char *const *argv)
     return NGX_OK;
 }
 
-
 static ngx_int_t
 ngx_process_options(ngx_cycle_t *cycle)
 {
@@ -1088,7 +1091,7 @@ ngx_process_options(ngx_cycle_t *cycle)
 
     return NGX_OK;
 }
-
+*/
 
 static void *
 ngx_core_module_create_conf(ngx_cycle_t *cycle)

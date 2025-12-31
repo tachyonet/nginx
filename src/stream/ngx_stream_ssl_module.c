@@ -126,13 +126,6 @@ static ngx_command_t  ngx_stream_ssl_commands[] = {
       0,
       NULL },
 
-    { ngx_string("ssl_ech_file"),
-      NGX_STREAM_MAIN_CONF|NGX_STREAM_SRV_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_str_array_slot,
-      NGX_STREAM_SRV_CONF_OFFSET,
-      offsetof(ngx_stream_ssl_srv_conf_t, ech_files),
-      NULL },
-
     { ngx_string("ssl_password_file"),
       NGX_STREAM_MAIN_CONF|NGX_STREAM_SRV_CONF|NGX_CONF_TAKE1,
       ngx_stream_ssl_password_file,
@@ -378,13 +371,6 @@ static ngx_stream_variable_t  ngx_stream_ssl_vars[] = {
 
     { ngx_string("ssl_alpn_protocol"), NULL, ngx_stream_ssl_variable,
       (uintptr_t) ngx_ssl_get_alpn_protocol, NGX_STREAM_VAR_CHANGEABLE, 0 },
-
-    { ngx_string("ssl_ech_status"), NULL, ngx_stream_ssl_variable,
-      (uintptr_t) ngx_ssl_get_ech_status, NGX_STREAM_VAR_CHANGEABLE, 0 },
-
-    { ngx_string("ssl_ech_outer_server_name"), NULL, ngx_stream_ssl_variable,
-      (uintptr_t) ngx_ssl_get_ech_outer_server_name,
-      NGX_STREAM_VAR_CHANGEABLE, 0 },
 
     { ngx_string("ssl_client_cert"), NULL, ngx_stream_ssl_variable,
       (uintptr_t) ngx_ssl_get_certificate, NGX_STREAM_VAR_CHANGEABLE, 0 },
@@ -902,7 +888,6 @@ ngx_stream_ssl_create_srv_conf(ngx_conf_t *cf)
     sscf->certificates = NGX_CONF_UNSET_PTR;
     sscf->certificate_keys = NGX_CONF_UNSET_PTR;
     sscf->certificate_cache = NGX_CONF_UNSET_PTR;
-    sscf->ech_files = NGX_CONF_UNSET_PTR;
     sscf->passwords = NGX_CONF_UNSET_PTR;
     sscf->conf_commands = NGX_CONF_UNSET_PTR;
     sscf->prefer_server_ciphers = NGX_CONF_UNSET;
@@ -957,8 +942,6 @@ ngx_stream_ssl_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child)
 
     ngx_conf_merge_ptr_value(conf->certificate_cache, prev->certificate_cache,
                          NULL);
-
-    ngx_conf_merge_ptr_value(conf->ech_files, prev->ech_files, NULL);
 
     ngx_conf_merge_ptr_value(conf->passwords, prev->passwords, NULL);
 
@@ -1025,9 +1008,7 @@ ngx_stream_ssl_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child)
     {
     static ngx_ssl_client_hello_arg cb = { ngx_stream_ssl_servername };
 
-    if (ngx_ssl_set_client_hello_callback(&conf->ssl, &cb) != NGX_OK) {
-        return NGX_CONF_ERROR;
-    }
+    ngx_ssl_set_client_hello_callback(conf->ssl.ctx, &cb);
 
     SSL_CTX_set_tlsext_servername_callback(conf->ssl.ctx,
                                            ngx_stream_ssl_servername);
@@ -1138,10 +1119,6 @@ ngx_stream_ssl_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child)
     }
 
     if (ngx_ssl_dhparam(cf, &conf->ssl, &conf->dhparam) != NGX_OK) {
-        return NGX_CONF_ERROR;
-    }
-
-    if (ngx_ssl_ech_files(cf, &conf->ssl, conf->ech_files) != NGX_OK) {
         return NGX_CONF_ERROR;
     }
 
