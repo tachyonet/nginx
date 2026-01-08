@@ -26,6 +26,7 @@ typedef struct {
 
 #endif
 
+ngx_int_t ngx_event_process_init(ngx_cycle_t *cycle);
 
 struct ngx_event_s {
     void            *data;

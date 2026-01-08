@@ -14,19 +14,17 @@
 #include <ngx_event.h>
 
 
-#define ngx_post_event(ev, q)                                                 \
-                                                                              \
-    if (!(ev)->posted) {                                                      \
-        (ev)->posted = 1;                                                     \
-        ngx_queue_insert_tail(q, &(ev)->queue);                               \
-                                                                              \
-        ngx_log_debug1(NGX_LOG_DEBUG_CORE, (ev)->log, 0, "post event %p", ev);\
-                                                                              \
-    } else  {                                                                 \
-        ngx_log_debug1(NGX_LOG_DEBUG_CORE, (ev)->log, 0,                      \
-                       "update posted event %p", ev);                         \
-    }
-
+#define ngx_post_event(ev, q)          \
+    do {                               \
+        (void) (q);  /* <--- Silences "unused variable" error */ \
+        if (!(ev)->posted) {           \
+            (ev)->posted = 1;          \
+            if ((ev)->handler) {       \
+                (ev)->handler(ev);     \
+            }                          \
+            (ev)->posted = 0;          \
+        }                              \
+    } while (0)
 
 #define ngx_delete_posted_event(ev)                                           \
                                                                               \

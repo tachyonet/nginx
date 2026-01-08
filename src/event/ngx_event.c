@@ -22,7 +22,7 @@ extern ngx_module_t ngx_select_module;
 
 static char *ngx_event_init_conf(ngx_cycle_t *cycle, void *conf);
 static ngx_int_t ngx_event_module_init(ngx_cycle_t *cycle);
-static ngx_int_t ngx_event_process_init(ngx_cycle_t *cycle);
+//static ngx_int_t ngx_event_process_init(ngx_cycle_t *cycle);
 static char *ngx_events_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 
 static char *ngx_event_connections(ngx_conf_t *cf, ngx_command_t *cmd,
@@ -633,7 +633,7 @@ ngx_timer_signal_handler(int signo)
 #endif
 
 
-static ngx_int_t
+ngx_int_t
 ngx_event_process_init(ngx_cycle_t *cycle)
 {
     ngx_uint_t           m, i;
